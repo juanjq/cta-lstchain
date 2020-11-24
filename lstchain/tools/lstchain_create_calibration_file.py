@@ -9,8 +9,6 @@ from ctapipe.io import EventSource, HDF5TableWriter
 from lstchain.calib.camera.calibration_calculator import CalibrationCalculator
 from ctapipe.containers import EventType
 
-__all__ = ["CalibrationHDF5Writer"]
-
 
 class CalibrationHDF5Writer(Tool):
 
