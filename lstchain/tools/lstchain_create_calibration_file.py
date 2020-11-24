@@ -7,7 +7,9 @@ from ctapipe.core import Provenance, Tool, traits
 from ctapipe.io import EventSource, HDF5TableWriter
 
 from lstchain.calib.camera.calibration_calculator import CalibrationCalculator
-from ctapipe.containers import EventType
+from lstchain.calib.camera.r0 import CameraR0Calibrator
+from lstchain.io.lstcontainers import LSTEventType
+from tqdm.autonotebook import tqdm
 
 
 class CalibrationHDF5Writer(Tool):
@@ -16,11 +18,18 @@ class CalibrationHDF5Writer(Tool):
     description = "Generate a HDF5 file with camera calibration coefficients"
 
     one_event = traits.Bool(False, help="Stop after first calibration event").tag(config=True)
+
     output = traits.Path(
         help="Name of the output file",
         directory_ok=False,
         default_value="calibration.hdf5"
     ).tag(config=True)
+
+    progress_bar = traits.Bool(
+        help="show progress bar during processing",
+        default_value=True,
+    ).tag(config=True)
+
     calibration_product = traits.create_class_enum_trait(
         CalibrationCalculator, default_value="LSTCalibrationCalculator"
     )
@@ -46,7 +55,7 @@ class CalibrationHDF5Writer(Tool):
         super().__init__(**kwargs)
         """
         Tool that generates a HDF5 file with camera calibration coefficients.
-        Input file must contain interleaved pedestal and flat-field events.  
+        Input file must contain interleaved pedestal and flat-field events.
         
         For getting help run:
         lstchain_create_calibration --help
@@ -97,11 +106,13 @@ class CalibrationHDF5Writer(Tool):
 
         try:
             self.log.debug(f"Start loop")
-            self.log.debug(f"If not simulation, skip first {events_to_skip} events")
-            for count, event in enumerate(self.eventsource):
-
-                if count % 100 == 0 and count> events_to_skip:
-                    self.log.debug(f"Event {count}")
+            for count, event in tqdm(
+                    enumerate(self.eventsource),
+                    desc=self.eventsource.__class__.__name__,
+                    total=self.tot_events,
+                    unit="ev",
+                    disable=not self.progress_bar,
+            ):
 
                 # if last event write results
                 max_events_reached = (
