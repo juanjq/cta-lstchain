@@ -72,7 +72,6 @@ run_summary = calibration_directory + "RunSummary_20201120.ecsv"
 
 
 
-
 #################################################################################
 # function for printing a set of images and save them into a directory
 #################################################################################
