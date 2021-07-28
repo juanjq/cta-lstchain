@@ -33,7 +33,7 @@ from ctapipe.io import EventSource
 
 #number of subruns we have
 number_subruns=122
-#number assigned to the concrete run (only for the name of the files)
+#number assigned to the concrete run (only for the name of the files saved)
 run_number=2969
 #number of events in each subrun, normally they are saved in groups of 53000 events
 subrun_events=53000
@@ -74,7 +74,7 @@ run_summary = calibration_directory + "RunSummary_20201120.ecsv"
 
 
 #################################################################################
-# function for prnting a set of images and save them into a directory
+# function for printing a set of images and save them into a directory
 #################################################################################
 
 
@@ -84,7 +84,7 @@ def plot(      array_ids,                     #array with the ID's of the events
                
                plot_direction=True,           #to represent the reconstructed direction, ellipse, and source
                
-               gamma_lim=0.5,                 #gammanness limit to represent the reconstructed parameters
+               gamma_lim=0.5,                 #gammanness limit to represent the reconstructed parameters (for not plotting them in not gammalike events)
                
                colormap_scale=0.7,            #change the maximum limit of the colormap [0-1]
                
@@ -207,7 +207,7 @@ def plot(      array_ids,                     #array with the ID's of the events
             fig.savefig(folder_name+'_Run'+str(run_number)+'/event_'+str(N).zfill(7)+
                         '_'+representation+file_type, dpi=300)
 
-        #if we only want to download the image we dont show 
+        #if we only want to download the image we dont show it (is faster)
         if plot_image==False:
             plt.close()
         else:
@@ -215,7 +215,6 @@ def plot(      array_ids,                     #array with the ID's of the events
 
     ###########################################################################
     #plot a representation of both charges and times one next to the other#####
-    
     def complet_plot_double(N):
 
         print('Plotting Event ID ='+str(N))
@@ -352,7 +351,7 @@ def plot(      array_ids,                     #array with the ID's of the events
     
     
 #################################################################################
-# function for prnting a set of animations and save them into a directory
+# function for printing a set of animations and save them into a directory
 #################################################################################
 
 
@@ -364,7 +363,7 @@ def animate(   array_ids,                     #array with the ID's of the events
                
                colormap_scale=0.7,            #change the maximum limit of the colormap [0-1]
                
-               file_type='.gif',              #type of archive to save the image '.gif', for '.mp4' ffpmeg needed
+               file_type='.gif',              #type of archive to save the image '.gif' (for '.mp4' ffpmeg needed)
                
                fps=20,                        #frames per second for the animation
                
@@ -415,7 +414,7 @@ def animate(   array_ids,                     #array with the ID's of the events
             else:
                 SubrunsList_translate_[i].append(SubrunsList_[i][j]-SubrunsList_[i][j-1])
     
-    #estimation of time
+    #estimation of time of the process
     total_iterations=0
     total_images=0
     for i in range(len(SubrunsList_translate_)):
@@ -425,7 +424,6 @@ def animate(   array_ids,                     #array with the ID's of the events
     time_est=(33*total_iterations/1000+total_images*12)/60
     print('\n Estimated time = '+str(round((time_est),2))+' (min) \n')        
     
-
 
     #################################################
     
@@ -437,7 +435,7 @@ def animate(   array_ids,                     #array with the ID's of the events
 
     #################################################
 
-    #definition of function to animate
+    #definition of function to animate outside of the loop
 
     def animate(i):
 
@@ -534,7 +532,8 @@ def animate(   array_ids,                     #array with the ID's of the events
 
             for jj in SubrunsList_translate_[ii]: 
 
-                #for going to a determined event ID we need to pass trough all before id's
+                #for going to a determined event ID we need to pass trough all before id's (don't know a faster way to do it) 
+                #aproximately pass trough 1000 events in 30 seconds
                 for j in range(jj):
                     for i, ev in enumerate(source): 
                         break
@@ -629,7 +628,8 @@ def search( sort=False,                     #if we want to sort the list in term
 
             inflim_reco_energy=False,       #reco_energy
             suplim_reco_energy=False,
-
+            
+            #defoult defined parameters
             #gamma like intense events
             gamma_like=False,
             #muon like events
@@ -671,7 +671,7 @@ def search( sort=False,                     #if we want to sort the list in term
     ############################
     
     #filters
-    #we doesnt filter the events that are not defined to optimize
+    #we doesnt filter the parameters that are not defined to optimize
     
     #restrict only cosmic events
     df=df[df['event_type']==32]
