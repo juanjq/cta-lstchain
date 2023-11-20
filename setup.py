@@ -1,20 +1,6 @@
-#!/usr/bin/env python
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
-# import sys
 from setuptools import setup, find_packages
 import os
-import sys
-
-# Add lstchain folder to path (contains version.py)
-# this is needed as lstchain/__init__.py imports dependencies
-# that might not be installed before setup runs, so we cannot import
-# lstchain.version
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "lstchain"))
-from version import get_version, update_release_version  # noqa
-
-
-update_release_version()
-version = get_version()
 
 
 def find_scripts(script_dir, prefix):
@@ -37,41 +23,58 @@ tools_list = find_scripts("lstchain/tools", "lstchain_")
 entry_points = {}
 entry_points["console_scripts"] = lstchain_list + onsite_list + tools_list
 
+tests_require = ["pytest"]
+docs_require = [
+    "sphinx~=4.2",
+    "sphinx-automodapi",
+    "sphinx_argparse",
+    "sphinx_rtd_theme",
+    "numpydoc",
+    "nbsphinx",
+    "sphinxcontrib-mermaid",
+    "sphinx-togglebutton"
+]
+
 setup(
-    version=version,
-    packages=find_packages(),
+    use_scm_version={"write_to": os.path.join("lstchain", "_version.py")},
+    packages=find_packages(exclude="lstchain._dev_version"),
     install_requires=[
-        'astropy~=4.2',
-        'ctapipe~=0.10.5',
-        'ctapipe_io_lst~=0.9.2',
-        'ctaplot~=0.5.5',
-        'eventio>=1.5.1,<2.0.0a0',  # at least 1.1.1, but not 2
-        'gammapy>=0.18',
+        'astropy~=5.0',
+        'bokeh~=2.0',
+        'ctapipe~=0.19.2',
+        'ctapipe_io_lst~=0.22.3',
+        'ctaplot~=0.6.4',
+        'eventio>=1.9.1,<2.0.0a0',  # at least 1.1.1, but not 2
+        'gammapy~=1.1',
         'h5py',
-        'joblib',
-        'matplotlib',
+        'iminuit>=2',
+        'joblib~=1.2.0',
+        'matplotlib~=3.7.0',
         'numba',
         'numpy',
         'pandas',
-        'pyirf~=0.4.0',
-        'scipy',
+        'protobuf~=3.20.0',
+        'pyirf~=0.8.0',
+        'scipy>=1.8',
         'seaborn',
-        'scikit-learn',
+        'scikit-learn~=1.2',
         'tables',
         'toml',
-        'traitlets',
-        'iminuit~=1.5',
+        'pymongo',
+        'pyparsing',
+        'setuptools_scm',
+        'jinja2~=3.0.2',  # pinned for bokeh 1.0 compatibility
     ],
+    extras_require={
+        "all": tests_require + docs_require,
+        "tests": tests_require,
+        "docs": docs_require,
+    },
     package_data={
         'lstchain': [
-            'data/lstchain_standard_config.json',
-            'data/onsite_camera_calibration_param.json',
-            'resources/LST_pixid_to_cluster.txt',
+            'data/*',
+            'resources/*',
         ],
     },
-    tests_require=[
-        "pytest",
-        "pytest-ordering",
-    ],
     entry_points=entry_points,
 )

@@ -1,6 +1,7 @@
 import numpy as np
-import pytest
 import pandas as pd
+
+import astropy.units as u
 from lstchain.io.io import dl2_params_lstcam_key
 
 from lstchain.mc.sensitivity import (
@@ -9,7 +10,6 @@ from lstchain.mc.sensitivity import (
     read_sim_par,
     calculate_sensitivity,
     calculate_sensitivity_lima,
-    calculate_sensitivity_lima_ebin,
     bin_definition,
     ring_containment,
     diff_events_after_cut_real,
@@ -19,19 +19,17 @@ from lstchain.mc.sensitivity import (
     find_cut_real
 )
 
-@pytest.mark.run(after='test_r0_to_dl1')
 def test_read_sim_par(simulated_dl1_file):
     par = read_sim_par(simulated_dl1_file)
 
-    assert np.isclose(par['emin'].to_value(), 0.003)
-    assert np.isclose(par['emax'].to_value(), 330.0)
+    assert u.isclose(par['emin'], 0.1 * u.TeV)
+    assert u.isclose(par['emax'], 5.0 * u.TeV)
     assert np.isclose(par['sp_idx'], -2.0)
-    assert np.isclose(par['sim_ev'], 400000)
-    assert np.isclose(par['area_sim'].to_value(), 2.82743339e+11)
-    assert np.isclose(par['cone'].to_value(), 10.0)
+    assert np.isclose(par['sim_ev'], 100)
+    assert u.isclose(par['area_sim'], np.pi * (250*u.m)**2)
+    assert u.isclose(par['cone'], 2 * u.deg)
 
 
-@pytest.mark.run(after='test_apply_models')
 def test_process_mc(simulated_dl2_file):
     #Write some delta_t and dragon_time in the example dl2 file
     dl2 = pd.read_hdf(simulated_dl2_file, key=dl2_params_lstcam_key)
@@ -43,7 +41,7 @@ def test_process_mc(simulated_dl2_file):
     process_mc(simulated_dl2_file, 'gamma')
     process_mc(simulated_dl2_file, 'proton')
     process_real(simulated_dl2_file)
-    pass
+
 
 def test_diff_events_after_cut(simulated_dl2_file):
 
@@ -82,18 +80,6 @@ def test_calculate_sensitivity_lima():
     np.testing.assert_allclose(calculate_sensitivity_lima(
             np.array([10, 100]), np.array([50,100]), np.array([1, 1])),
                                (np.array([63.00, 83.57]), np.array([630.07,  83.57])), rtol = 1.e-3)
-
-def test_calculate_sensitivity_lima_ebin():
-    np.testing.assert_allclose(calculate_sensitivity_lima_ebin(
-        np.array([50]), np.array([10]), np.array([0.2]), 1), ([13.49], [26.97]),
-        rtol=1.e-3)
-
-    np.testing.assert_allclose(calculate_sensitivity_lima_ebin(
-        np.array([50, 30, 20]), np.array([10, 10, 10]), np.array([0.2, 0.2, 0.2]), 3),
-        (([13.49, 13.49, 13.49]),
-         [26.97, 44.95, 67.43]),
-        rtol=1.e-3)
-
 
 def test_bin_definition():
     gammaness_bins, theta2_bins = bin_definition(10,10)

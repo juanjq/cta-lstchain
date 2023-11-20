@@ -1,0 +1,21 @@
+{
+  "FitIntensityScan":{
+   
+      "log_level":"DEBUG",  
+      "signal_range": [[1300,14000],[150,14000]],				     
+      "run_list":[9493,9495,9497,9498,9503,9506],                 
+      
+      "log_config": {
+       "loggers": {          
+          
+          "ctapipe.io.hdf5tableio.HDF5TableReader":{
+             "level": "INFO",
+	     "handlers": ["console"]  
+          }	                
+        } 
+	
+      }    
+    } 
+       
+  
+} 
